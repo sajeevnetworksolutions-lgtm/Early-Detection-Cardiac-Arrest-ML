@@ -1,10 +1,5 @@
 # Early Detection of Cardiac Arrest Using Machine Learning
-### Academic Research Project & Clinical Decision Support Prototype
-**Candidate:** DEEPTHI R L (25CSE06)  
-**Degree:** Master of Technology in Computer Science and Engineering  
-**Department:** Department of Computer Science & Engineering  
-**Institution:** Sri Siddhartha Institute of Technology (SSIT), Sri Siddhartha Academy of Higher Education, Tumakuru, Karnataka  
-**Academic Year:** 2026 - 2027 • **Course Code:** 24CSEPW1  
+
 
 ---
 
