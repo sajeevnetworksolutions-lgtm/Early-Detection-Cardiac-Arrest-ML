@@ -1,0 +1,118 @@
+{
+  "feature_names": [
+    "TIME_FROM_ADM",
+    "time_scaled",
+    "hr_normalized",
+    "dbp_normalized",
+    "rr_normalized",
+    "age_normalized"
+  ],
+  "target_correlation": {
+    "TIME_FROM_ADM": -0.0197,
+    "time_scaled": -0.0197,
+    "hr_normalized": 0.3095,
+    "dbp_normalized": -0.3349,
+    "rr_normalized": 0.3217,
+    "age_normalized": 0.1567
+  },
+  "correlation_matrix": {
+    "TIME_FROM_ADM": {
+      "TIME_FROM_ADM": 1.0,
+      "time_scaled": 1.0,
+      "hr_normalized": -0.0043,
+      "dbp_normalized": 0.001,
+      "rr_normalized": 0.0038,
+      "age_normalized": -0.0152
+    },
+    "time_scaled": {
+      "TIME_FROM_ADM": 1.0,
+      "time_scaled": 1.0,
+      "hr_normalized": -0.0043,
+      "dbp_normalized": 0.001,
+      "rr_normalized": 0.0038,
+      "age_normalized": -0.0152
+    },
+    "hr_normalized": {
+      "TIME_FROM_ADM": -0.0043,
+      "time_scaled": -0.0043,
+      "hr_normalized": 1.0,
+      "dbp_normalized": -0.3513,
+      "rr_normalized": 0.4175,
+      "age_normalized": 0.1067
+    },
+    "dbp_normalized": {
+      "TIME_FROM_ADM": 0.001,
+      "time_scaled": 0.001,
+      "hr_normalized": -0.3513,
+      "dbp_normalized": 1.0,
+      "rr_normalized": -0.3834,
+      "age_normalized": -0.1018
+    },
+    "rr_normalized": {
+      "TIME_FROM_ADM": 0.0038,
+      "time_scaled": 0.0038,
+      "hr_normalized": 0.4175,
+      "dbp_normalized": -0.3834,
+      "rr_normalized": 1.0,
+      "age_normalized": 0.1039
+    },
+    "age_normalized": {
+      "TIME_FROM_ADM": -0.0152,
+      "time_scaled": -0.0152,
+      "hr_normalized": 0.1067,
+      "dbp_normalized": -0.1018,
+      "rr_normalized": 0.1039,
+      "age_normalized": 1.0
+    }
+  },
+  "mutual_information": {
+    "TIME_FROM_ADM": 0.0,
+    "time_scaled": 0.0,
+    "hr_normalized": 0.0467,
+    "dbp_normalized": 0.0575,
+    "rr_normalized": 0.0527,
+    "age_normalized": 0.0154
+  },
+  "random_forest_importance": {
+    "TIME_FROM_ADM": 0.0298,
+    "time_scaled": 0.0318,
+    "hr_normalized": 0.2379,
+    "dbp_normalized": 0.3566,
+    "rr_normalized": 0.2526,
+    "age_normalized": 0.0913
+  },
+  "rfe_ranking": {
+    "TIME_FROM_ADM": 3,
+    "time_scaled": 2,
+    "hr_normalized": 1,
+    "dbp_normalized": 1,
+    "rr_normalized": 1,
+    "age_normalized": 1
+  },
+  "composite_scores": {
+    "TIME_FROM_ADM": 0.0957,
+    "time_scaled": 0.1379,
+    "hr_normalized": 0.3985,
+    "dbp_normalized": 0.4372,
+    "rr_normalized": 0.4068,
+    "age_normalized": 0.3159
+  },
+  "ranked_features": [
+    "dbp_normalized",
+    "rr_normalized",
+    "hr_normalized",
+    "age_normalized",
+    "time_scaled",
+    "TIME_FROM_ADM"
+  ],
+  "selected_features": [
+    "dbp_normalized",
+    "rr_normalized",
+    "hr_normalized",
+    "age_normalized"
+  ],
+  "removed_features": [
+    "time_scaled",
+    "TIME_FROM_ADM"
+  ]
+}

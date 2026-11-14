@@ -1,0 +1,8 @@
+Algorithm,Modality,Accuracy,Sensitivity (Recall),Specificity,Precision,F1-Score,ROC-AUC,PR-AUC,FPR,FNR,CDSI Score
+Logistic Regression,ICU Time Series (Tabular),0.713,0.7009,0.7163,0.4021,0.5111,0.7959,0.5426,0.2837,0.2991,0.6527
+Decision Tree,ICU Time Series (Tabular),0.735,0.6075,0.7697,0.418,0.4952,0.77,0.4839,0.2303,0.3925,0.5942
+Random Forest,ICU Time Series (Tabular),0.716,0.6355,0.7379,0.3977,0.4892,0.791,0.5411,0.2621,0.3645,0.6219
+Support Vector Machine,ICU Time Series (Tabular),0.718,0.7009,0.7226,0.4076,0.5155,0.7899,0.4632,0.2774,0.2991,0.6326
+K-Nearest Neighbors,ICU Time Series (Tabular),0.785,0.2991,0.9173,0.4961,0.3732,0.7198,0.4326,0.0827,0.7009,0.4392
+Artificial Neural Network,ICU Time Series (Tabular),0.818,0.2897,0.9618,0.6739,0.4052,0.7993,0.5434,0.0382,0.7103,0.4848
+1D-CNN (ECG Waveform Classifier),ECG Lead II Waveform (1D),0.95,0.7222,1.0,1.0,0.8387,0.9898,0.9593,0.0,0.2778,0.8489
