@@ -19,9 +19,6 @@ export const Navbar: React.FC<NavbarProps> = ({ systemReady, bestModelName }) =>
               <h1 className="text-lg font-bold text-slate-900 tracking-tight">
                 CARDIAC DETERIORATION & EARLY ARREST WARNING
               </h1>
-              <span className="bg-sky-50 text-sky-700 text-xs font-semibold px-2.5 py-0.5 rounded-full border border-sky-200">
-                SSIT M.Tech CSE
-              </span>
             </div>
             <p className="text-xs text-slate-500 font-medium">
               Academic Clinical Decision Support Prototype • Deepthi R L (25CSE06)

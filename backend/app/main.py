@@ -15,6 +15,7 @@ if PROJECT_ROOT not in sys.path:
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 
 from backend.app.api.datasets import router as datasets_router
 from backend.app.api.models import router as models_router
@@ -45,20 +46,6 @@ app.include_router(predict_router)
 app.include_router(ecg_router)
 app.include_router(reports_router)
 
-# Mount static directories for research figures
-graphs_dir = os.path.join(PROJECT_ROOT, "results", "graphs")
-os.makedirs(graphs_dir, exist_ok=True)
-app.mount("/static/graphs", StaticFiles(directory=graphs_dir), name="graphs")
-
-cm_dir = os.path.join(PROJECT_ROOT, "results", "confusion_matrices")
-os.makedirs(cm_dir, exist_ok=True)
-app.mount("/static/confusion_matrices", StaticFiles(directory=cm_dir), name="confusion_matrices")
-
-# Mount frontend production build if available
-frontend_dist = os.path.join(PROJECT_ROOT, "frontend", "dist")
-if os.path.exists(frontend_dist):
-    app.mount("/", StaticFiles(directory=frontend_dist, html=True), name="frontend")
-
 @app.on_event("startup")
 def on_startup():
     init_db()
@@ -74,3 +61,29 @@ def health_check():
         "models_ready": os.path.exists(os.path.join(PROJECT_ROOT, "saved_models", "preprocessor.joblib")),
         "database": "SQLite (data/metadata.db)"
     }
+
+# Mount static directories for research figures
+graphs_dir = os.path.join(PROJECT_ROOT, "results", "graphs")
+os.makedirs(graphs_dir, exist_ok=True)
+app.mount("/static/graphs", StaticFiles(directory=graphs_dir), name="graphs")
+
+cm_dir = os.path.join(PROJECT_ROOT, "results", "confusion_matrices")
+os.makedirs(cm_dir, exist_ok=True)
+app.mount("/static/confusion_matrices", StaticFiles(directory=cm_dir), name="confusion_matrices")
+
+# Mount frontend production build assets
+frontend_dist = os.path.join(PROJECT_ROOT, "frontend", "dist")
+assets_dir = os.path.join(frontend_dist, "assets")
+if os.path.exists(assets_dir):
+    app.mount("/assets", StaticFiles(directory=assets_dir), name="assets")
+
+# SPA Fallback Route for client-side React routing
+@app.get("/{full_path:path}")
+def serve_spa(full_path: str):
+    candidate = os.path.join(frontend_dist, full_path)
+    if full_path and os.path.isfile(candidate):
+        return FileResponse(candidate)
+    index_file = os.path.join(frontend_dist, "index.html")
+    if os.path.exists(index_file):
+        return FileResponse(index_file)
+    return {"message": "Frontend build not found. Visit /docs for API."}
