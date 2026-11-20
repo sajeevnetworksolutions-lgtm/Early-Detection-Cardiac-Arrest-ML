@@ -45,8 +45,8 @@ def set_slide_background(slide, color):
     fill.fore_color.rgb = color
 
 def add_header(slide, category, title, subtitle=None):
-    """Clean standardized header for all content slides."""
-    tx_box = slide.shapes.add_textbox(Inches(0.8), Inches(0.35), Inches(11.733), Inches(1.1))
+    """Clean standardized header for all content slides with balanced top margins."""
+    tx_box = slide.shapes.add_textbox(Inches(0.8), Inches(0.38), Inches(11.733), Inches(1.05))
     tf = tx_box.text_frame
     tf.word_wrap = True
     tf.margin_left = tf.margin_top = tf.margin_right = tf.margin_bottom = 0
@@ -82,19 +82,23 @@ def add_header(slide, category, title, subtitle=None):
     line.fill.fore_color.rgb = C_BORDER_LIGHT
     line.line.color.rgb = C_BORDER_LIGHT
 
-def add_card(slide, left, top, width, height, bg_color=C_CARD_BG, border_color=C_BORDER_LIGHT, line_width=Pt(1)):
-    """Draw a rounded rectangle background card."""
+def add_card(slide, left, top, width, height, bg_color=C_CARD_BG, border_color=C_BORDER_LIGHT, line_width=Pt(1), corner_radius=0.032):
+    """
+    Draw a clean, modern card with subtle rounded corners.
+    Crucial fix: corner_radius=0.032 eliminates the cartoonish oversized pill corners!
+    """
     shape = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, left, top, width, height)
     shape.fill.solid()
     shape.fill.fore_color.rgb = bg_color
     shape.line.color.rgb = border_color
     shape.line.width = line_width
+    shape.adjustments[0] = corner_radius
     return shape
 
 def add_metric_badge(slide, left, top, width, height, value, label, sublabel="", val_color=C_BLUE_PRIMARY, bg_color=C_CARD_BG, border_color=C_BORDER_LIGHT):
-    """Draw a compact KPI metric badge."""
-    add_card(slide, left, top, width, height, bg_color=bg_color, border_color=border_color)
-    tb = slide.shapes.add_textbox(left + Inches(0.12), top + Inches(0.10), width - Inches(0.24), height - Inches(0.20))
+    """Draw a compact KPI metric badge with crisp corners and balanced margins."""
+    add_card(slide, left, top, width, height, bg_color=bg_color, border_color=border_color, corner_radius=0.045)
+    tb = slide.shapes.add_textbox(left + Inches(0.16), top + Inches(0.12), width - Inches(0.32), height - Inches(0.24))
     tf = tb.text_frame
     tf.word_wrap = True
     tf.margin_left = tf.margin_right = tf.margin_top = tf.margin_bottom = 0
@@ -103,7 +107,7 @@ def add_metric_badge(slide, left, top, width, height, value, label, sublabel="",
     p1.text = ""
     r1 = p1.add_run()
     r1.text = str(value)
-    r1.font.size = Pt(24)
+    r1.font.size = Pt(25)
     r1.font.bold = True
     r1.font.color.rgb = val_color
     p1.space_after = Pt(2)
@@ -112,7 +116,7 @@ def add_metric_badge(slide, left, top, width, height, value, label, sublabel="",
     p2.text = ""
     r2 = p2.add_run()
     r2.text = label
-    r2.font.size = Pt(10.5)
+    r2.font.size = Pt(11)
     r2.font.bold = True
     r2.font.color.rgb = C_NAVY_DARK
     p2.space_after = Pt(1)
@@ -126,15 +130,25 @@ def add_metric_badge(slide, left, top, width, height, value, label, sublabel="",
         r3.font.color.rgb = C_TEXT_MUTED
 
 def add_card_with_content(slide, left, top, width, height, title=None, items=None, subtitle=None, formula=None,
-                          title_color=C_NAVY_DARK, title_size=Pt(14), font_size=Pt(10), bg_color=C_CARD_BG,
-                          border_color=C_BORDER_LIGHT, pad_x=Inches(0.18), pad_y=Inches(0.14), item_space=Pt(4)):
+                          title_color=C_NAVY_DARK, title_size=Pt(15.5), font_size=Pt(11), bg_color=C_CARD_BG,
+                          border_color=C_BORDER_LIGHT, pad_x=Inches(0.26), pad_y=Inches(0.22), item_space=Pt(10),
+                          line_spacing=1.22, accent_color=None, corner_radius=0.032):
     """
-    Bulletproof card content generator that GUARANTEES:
-    1. word_wrap = True on every text frame.
-    2. Zero title/bullet concatenation - every bullet is a separate paragraph.
-    3. Proper padding and bounded margins so text never overflows.
+    Precision card generator that GUARANTEES:
+    1. Elegant, subtle modern rounded corners (corner_radius=0.032) instead of bulbous pills.
+    2. Proportional typography and line spacing so text naturally fills the card height with zero empty bottom void.
+    3. Strict word wrapping and isolated paragraphs for headers and bullets.
+    4. Optional top accent bar for executive-level visual polish.
     """
-    add_card(slide, left, top, width, height, bg_color=bg_color, border_color=border_color)
+    card = add_card(slide, left, top, width, height, bg_color=bg_color, border_color=border_color, corner_radius=corner_radius)
+
+    # Optional top accent bar
+    if accent_color:
+        acc = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, left + Inches(0.02), top + Inches(0.02), width - Inches(0.04), Inches(0.05))
+        acc.fill.solid()
+        acc.fill.fore_color.rgb = accent_color
+        acc.line.fill.background()
+        acc.adjustments[0] = 0.5
 
     tb = slide.shapes.add_textbox(left + pad_x, top + pad_y, width - (2 * pad_x), height - (2 * pad_y))
     tf = tb.text_frame
@@ -151,7 +165,7 @@ def add_card_with_content(slide, left, top, width, height, title=None, items=Non
         r_t.font.size = title_size
         r_t.font.bold = True
         r_t.font.color.rgb = title_color
-        p_t.space_after = Pt(4)
+        p_t.space_after = Pt(8)
         first_p = False
 
     if subtitle:
@@ -159,10 +173,10 @@ def add_card_with_content(slide, left, top, width, height, title=None, items=Non
         p_s.text = ""
         r_s = p_s.add_run()
         r_s.text = subtitle
-        r_s.font.size = Pt(10.5)
+        r_s.font.size = Pt(11.5)
         r_s.font.bold = True
         r_s.font.color.rgb = C_TEXT_MAIN
-        p_s.space_after = Pt(4)
+        p_s.space_after = Pt(6)
         first_p = False
 
     if formula:
@@ -170,17 +184,17 @@ def add_card_with_content(slide, left, top, width, height, title=None, items=Non
         p_f.text = ""
         r_f = p_f.add_run()
         r_f.text = formula
-        r_f.font.size = Pt(10)
+        r_f.font.size = Pt(10.5)
         r_f.font.bold = True
         r_f.font.color.rgb = C_BLUE_PRIMARY
-        p_f.space_after = Pt(5)
+        p_f.space_after = Pt(8)
         first_p = False
 
     if items:
         for idx, item in enumerate(items):
             p = tf.add_paragraph() if not first_p else tf.paragraphs[0]
             first_p = False
-            p.line_spacing = 1.15
+            p.line_spacing = line_spacing
             p.space_after = item_space
 
             if isinstance(item, tuple):
@@ -205,7 +219,7 @@ def add_card_with_content(slide, left, top, width, height, title=None, items=Non
     return tb
 
 def create_table(slide, left, top, width, height, headers, rows, col_widths=None, header_bg=C_NAVY_DARK):
-    """Generate professional formatted table with strict word wrapping on every cell."""
+    """Generate professional formatted table with strict word wrapping and balanced cell padding."""
     num_rows = len(rows) + 1
     num_cols = len(headers)
     table_shape = slide.shapes.add_table(num_rows, num_cols, left, top, width, height)
@@ -224,8 +238,8 @@ def create_table(slide, left, top, width, height, headers, rows, col_widths=None
         tf.word_wrap = True
         tf.margin_left = Inches(0.08)
         tf.margin_right = Inches(0.08)
-        tf.margin_top = Inches(0.06)
-        tf.margin_bottom = Inches(0.06)
+        tf.margin_top = Inches(0.08)
+        tf.margin_bottom = Inches(0.08)
         p = tf.paragraphs[0]
         p.text = header
         p.font.bold = True
@@ -244,11 +258,11 @@ def create_table(slide, left, top, width, height, headers, rows, col_widths=None
             tf.word_wrap = True
             tf.margin_left = Inches(0.08)
             tf.margin_right = Inches(0.08)
-            tf.margin_top = Inches(0.05)
-            tf.margin_bottom = Inches(0.05)
+            tf.margin_top = Inches(0.07)
+            tf.margin_bottom = Inches(0.07)
             p = tf.paragraphs[0]
             p.text = str(val)
-            p.font.size = Pt(9)
+            p.font.size = Pt(9.5)
             p.font.color.rgb = C_NAVY_DARK
             
             if col_idx == 0:
@@ -278,13 +292,11 @@ def build_presentation():
     s1 = prs.slides.add_slide(blank_layout)
     set_slide_background(s1, C_NAVY_DARK)
 
-    # Accent decorative top bar
     bar = s1.shapes.add_shape(MSO_SHAPE.RECTANGLE, Inches(0.8), Inches(0.7), Inches(11.733), Inches(0.08))
     bar.fill.solid()
     bar.fill.fore_color.rgb = C_BLUE_PRIMARY
     bar.line.color.rgb = C_BLUE_PRIMARY
 
-    # Institution
     tb_inst = s1.shapes.add_textbox(Inches(0.8), Inches(1.0), Inches(11.733), Inches(0.7))
     tf_inst = tb_inst.text_frame
     tf_inst.word_wrap = True
@@ -299,7 +311,6 @@ def build_presentation():
     p_inst2.font.size = Pt(11)
     p_inst2.font.color.rgb = C_TEXT_MUTED
 
-    # Title & Subtitle
     tb_title = s1.shapes.add_textbox(Inches(0.8), Inches(1.9), Inches(11.733), Inches(2.3))
     tf_t = tb_title.text_frame
     tf_t.word_wrap = True
@@ -316,9 +327,8 @@ def build_presentation():
     p_sub.font.size = Pt(15)
     p_sub.font.color.rgb = RGBColor(147, 197, 253)
 
-    # Metadata Cards (Author & Guides)
-    add_card(s1, Inches(0.8), Inches(4.5), Inches(5.7), Inches(2.4), bg_color=C_NAVY_LIGHT, border_color=C_BORDER_DARK)
-    tb_a = s1.shapes.add_textbox(Inches(1.0), Inches(4.65), Inches(5.3), Inches(2.1))
+    add_card(s1, Inches(0.8), Inches(4.5), Inches(5.70), Inches(2.35), bg_color=C_NAVY_LIGHT, border_color=C_BORDER_DARK, corner_radius=0.035)
+    tb_a = s1.shapes.add_textbox(Inches(1.05), Inches(4.65), Inches(5.20), Inches(2.05))
     tf_a = tb_a.text_frame
     tf_a.word_wrap = True
     tf_a.margin_left = tf_a.margin_top = tf_a.margin_right = tf_a.margin_bottom = 0
@@ -339,8 +349,8 @@ def build_presentation():
     p_ad.font.size = Pt(11)
     p_ad.font.color.rgb = RGBColor(203, 213, 225)
 
-    add_card(s1, Inches(6.8), Inches(4.5), Inches(5.7), Inches(2.4), bg_color=C_NAVY_LIGHT, border_color=C_BORDER_DARK)
-    tb_g = s1.shapes.add_textbox(Inches(7.0), Inches(4.65), Inches(5.3), Inches(2.1))
+    add_card(s1, Inches(6.83), Inches(4.5), Inches(5.70), Inches(2.35), bg_color=C_NAVY_LIGHT, border_color=C_BORDER_DARK, corner_radius=0.035)
+    tb_g = s1.shapes.add_textbox(Inches(7.08), Inches(4.65), Inches(5.20), Inches(2.05))
     tf_g = tb_g.text_frame
     tf_g.word_wrap = True
     tf_g.margin_left = tf_g.margin_top = tf_g.margin_right = tf_g.margin_bottom = 0
@@ -371,28 +381,29 @@ def build_presentation():
     p_g2d.font.color.rgb = RGBColor(203, 213, 225)
 
     # =========================================================================
-    # SLIDE 2: Executive Summary & Core Research Vision (FIXED LAYOUT)
+    # SLIDE 2: Executive Summary & Core Research Vision (PERFECTLY ALIGNED)
     # =========================================================================
     s2 = prs.slides.add_slide(blank_layout)
     set_slide_background(s2, C_BG_LIGHT)
     add_header(s2, "Executive Overview", "Executive Summary & Core Research Vision", "Addressing the critical failure modes of conventional intensive care bedside monitoring")
 
-    # 4 Metric KPI Badges across top
-    add_metric_badge(s2, Inches(0.8), Inches(1.65), Inches(2.75), Inches(1.35), "70.09%", "Clinical Sensitivity", "True Positive Rescue Rate on Holdout Cohort", val_color=C_BLUE_PRIMARY)
-    add_metric_badge(s2, Inches(3.79), Inches(1.65), Inches(2.75), Inches(1.35), "29.91%", "False Negative Rate", "Minimized fatal missed deteriorations", val_color=C_GREEN_SAFE)
-    add_metric_badge(s2, Inches(6.78), Inches(1.65), Inches(2.75), Inches(1.35), "95.00%", "1D-CNN Arrhythmia Acc.", "Zero False Alarms on Patient Holdout", val_color=C_TEAL)
-    add_metric_badge(s2, Inches(9.77), Inches(1.65), Inches(2.75), Inches(1.35), "3.1 ms", "Real-Time Inference", "Sub-second bedside streaming latency", val_color=C_AMBER)
+    # 4 Metric KPI Badges across top (Y = 1.68, Height = 1.30)
+    add_metric_badge(s2, Inches(0.80), Inches(1.68), Inches(2.75), Inches(1.30), "70.09%", "Clinical Sensitivity", "True Positive Rescue Rate on Holdout Cohort", val_color=C_BLUE_PRIMARY)
+    add_metric_badge(s2, Inches(3.79), Inches(1.68), Inches(2.75), Inches(1.30), "29.91%", "False Negative Rate", "Minimized fatal missed deteriorations", val_color=C_GREEN_SAFE)
+    add_metric_badge(s2, Inches(6.78), Inches(1.68), Inches(2.75), Inches(1.30), "95.00%", "1D-CNN Arrhythmia Acc.", "Zero False Alarms on Patient Holdout", val_color=C_TEAL)
+    add_metric_badge(s2, Inches(9.77), Inches(1.68), Inches(2.75), Inches(1.30), "3.1 ms", "Real-Time Inference", "Sub-second bedside streaming latency", val_color=C_AMBER)
 
-    # 3 Strategic Pillars (Clean 3-column layout, width 3.7", strictly wrapped)
+    # 3 Pillar Cards below (Y = 3.22, Height = 3.70) - Proportional typography fills card naturally
     items_s2_c1 = [
         ("Fatality Rate > 75%", "In-Hospital Cardiac Arrest (IHCA) remains a leading clinical cause of mortality."),
         ("350 Alarms / Bed / Day", "Excessive triggers cause cognitive overload and sensory adaptation."),
         ("86% Alarm Suppression", "Bedside nurses experience alarm fatigue; deteriorations are missed for 45–90 mins."),
         ("Rigid Single-Cutoffs", "Heuristics (MEWS, NEWS) fail to track multi-system non-linear deterioration trends.")
     ]
-    add_card_with_content(s2, Inches(0.8), Inches(3.20), Inches(3.70), Inches(3.85),
+    add_card_with_content(s2, Inches(0.80), Inches(3.22), Inches(3.70), Inches(3.70),
                           title="The Clinical Crisis", items=items_s2_c1, title_color=C_RED_ALERT,
-                          title_size=Pt(14), font_size=Pt(9.5), item_space=Pt(4))
+                          title_size=Pt(14.5), font_size=Pt(10), pad_x=Inches(0.20), pad_y=Inches(0.18),
+                          item_space=Pt(8), line_spacing=1.20, accent_color=C_RED_ALERT)
 
     items_s2_c2 = [
         ("Multi-Modal Integration", "Combines continuous 360 Hz ECG waveforms with longitudinal tabular vital signs."),
@@ -400,9 +411,10 @@ def build_presentation():
         ("Consensus Biomarkers", "Four-way feature selection (Pearson, MI, RFE, Gini) isolates 4 dominant shock indices."),
         ("Safety-First CDSI Metric", "A novel index that heavily penalizes False Negative Rates over misleading raw accuracy.")
     ]
-    add_card_with_content(s2, Inches(4.81), Inches(3.20), Inches(3.70), Inches(3.85),
+    add_card_with_content(s2, Inches(4.82), Inches(3.22), Inches(3.70), Inches(3.70),
                           title="Technical Innovation", items=items_s2_c2, title_color=C_BLUE_PRIMARY,
-                          title_size=Pt(14), font_size=Pt(9.5), item_space=Pt(4))
+                          title_size=Pt(14.5), font_size=Pt(10), pad_x=Inches(0.20), pad_y=Inches(0.18),
+                          item_space=Pt(8), line_spacing=1.20, accent_color=C_BLUE_PRIMARY)
 
     items_s2_c3 = [
         ("Independent Holdout Test", "Empirically validated on 1,000 holdout patients (p < 0.001, t = 38.45)."),
@@ -410,12 +422,13 @@ def build_presentation():
         ("Full-Stack Architecture", "FastAPI microservice + React 19 / TypeScript 8-module clinical dashboard."),
         ("Hardware-Free Edge Feasibility", "Runs on standard 8-core CPU (< 12.4% CPU, 285 MB RAM) with no cloud required.")
     ]
-    add_card_with_content(s2, Inches(8.82), Inches(3.20), Inches(3.70), Inches(3.85),
+    add_card_with_content(s2, Inches(8.83), Inches(3.22), Inches(3.70), Inches(3.70),
                           title="System Delivery", items=items_s2_c3, title_color=C_TEAL,
-                          title_size=Pt(14), font_size=Pt(9.5), item_space=Pt(4))
+                          title_size=Pt(14.5), font_size=Pt(10), pad_x=Inches(0.20), pad_y=Inches(0.18),
+                          item_space=Pt(8), line_spacing=1.20, accent_color=C_TEAL)
 
     # =========================================================================
-    # SLIDE 3: Clinical Background & The Crisis in ICU Bedside Monitoring
+    # SLIDE 3: Clinical Background & The Crisis in ICU Bedside Monitoring (PERFECTLY PROPORTIONED)
     # =========================================================================
     s3 = prs.slides.add_slide(blank_layout)
     set_slide_background(s3, C_BG_LIGHT)
@@ -427,9 +440,11 @@ def build_presentation():
         ("The Critical 45–90 Minute Delay", "Because current monitoring requires clinicians to manually aggregate, trend, and correlate bedside vital signs, acute clinical deterioration goes unnoticed for 45 to 90 minutes."),
         ("Overwhelming Rapid Response Teams (RRTs)", "Inadequately calibrated heuristic scores trigger frequent false calls, leading to staff fatigue while true decompensations are overlooked.")
     ]
-    add_card_with_content(s3, Inches(0.8), Inches(1.65), Inches(5.70), Inches(5.35),
+    add_card_with_content(s3, Inches(0.80), Inches(1.68), Inches(5.70), Inches(5.20),
                           title="The Operational Reality in Modern ICUs", items=items_bg1,
-                          title_color=C_NAVY_DARK, title_size=Pt(15), font_size=Pt(10.5), item_space=Pt(6))
+                          title_color=C_NAVY_DARK, title_size=Pt(16.5), font_size=Pt(11),
+                          pad_x=Inches(0.28), pad_y=Inches(0.24), item_space=Pt(12),
+                          line_spacing=1.25, accent_color=C_NAVY_DARK)
 
     items_bg2 = [
         ("Rigid Unidimensional Thresholds", "Standard systems apply fixed rules (e.g., HR > 120 bpm, SBP < 90 mmHg). They are incapable of detecting complex multi-vital trajectories where individually normal values combine into severe risk."),
@@ -437,9 +452,11 @@ def build_presentation():
         ("Complete Waveform Disconnect", "Traditional telemetry monitors treat continuous electrocardiogram (ECG) waveforms and EHR vital signs as completely disjoint data silos."),
         ("The False Negative Blindspot", "Standard classification approaches optimize overall accuracy, ignoring that a False Negative in an ICU directly results in patient death.")
     ]
-    add_card_with_content(s3, Inches(6.83), Inches(1.65), Inches(5.70), Inches(5.35),
+    add_card_with_content(s3, Inches(6.83), Inches(1.68), Inches(5.70), Inches(5.20),
                           title="Architectural Flaws of Existing Early Warning Scores", items=items_bg2,
-                          title_color=C_RED_ALERT, title_size=Pt(15), font_size=Pt(10.5), item_space=Pt(6))
+                          title_color=C_RED_ALERT, title_size=Pt(16.5), font_size=Pt(11),
+                          pad_x=Inches(0.28), pad_y=Inches(0.24), item_space=Pt(12),
+                          line_spacing=1.25, accent_color=C_RED_ALERT)
 
     # =========================================================================
     # SLIDE 4: Multi-Modal Telemetry & The 3 Deterioration Pathways
@@ -470,10 +487,11 @@ def build_presentation():
     ]
 
     for idx, (p_title, p_color, p_items) in enumerate(p_cards):
-        left_pos = Inches(0.8 + idx * 4.01)
-        add_card_with_content(s4, left_pos, Inches(1.65), Inches(3.70), Inches(5.35),
+        left_pos = Inches(0.80 + idx * 4.015)
+        add_card_with_content(s4, left_pos, Inches(1.68), Inches(3.70), Inches(5.20),
                               title=p_title, items=p_items, title_color=p_color,
-                              title_size=Pt(13.5), font_size=Pt(9.5), item_space=Pt(5))
+                              title_size=Pt(14), font_size=Pt(10), pad_x=Inches(0.20), pad_y=Inches(0.20),
+                              item_space=Pt(10), line_spacing=1.22, accent_color=p_color)
 
     # =========================================================================
     # SLIDE 5: Literature Survey & Systematic Prior Art Matrix (Table I)
@@ -491,15 +509,15 @@ def build_presentation():
         ["Umair et al. (2026)", "Deep 1D-CNN", "Ambulatory ECG", "Morphological Recall", "Point solution; ignores systemic hemodynamics (hypotension, tachypnea, age)."],
         ["Proposed Framework (Ours)", "Multi-Modal ML + 1D-CNN", "PhysioNet eICU + MITDB", "CDSI (Safety Index)", "Leak-free isolated pipeline; penalizes FNR (29.9% vs 71.0%); full-stack clinical GUI."]
     ]
-    col_w_t1 = [Inches(2.4), Inches(2.0), Inches(2.0), Inches(2.0), Inches(3.333)]
-    create_table(s5, Inches(0.8), Inches(1.65), Inches(11.733), Inches(4.1), headers_t1, rows_t1, col_widths=col_w_t1)
+    col_w_t1 = [Inches(2.40), Inches(2.00), Inches(2.00), Inches(2.00), Inches(3.333)]
+    create_table(s5, Inches(0.80), Inches(1.68), Inches(11.733), Inches(3.90), headers_t1, rows_t1, col_widths=col_w_t1)
 
-    # Summary callout at bottom
-    add_card_with_content(s5, Inches(0.8), Inches(5.95), Inches(11.733), Inches(1.05),
+    add_card_with_content(s5, Inches(0.80), Inches(5.78), Inches(11.733), Inches(1.10),
                           title="CORE RESEARCH TAKEAWAY FROM LITERATURE SURVEY:",
                           items=["Existing literature either focuses exclusively on discrete vital signs or standalone ECG strips, without multi-modal coupling. Crucially, existing ML models suffer from the 'Accuracy Paradox', optimizing naive accuracy while missing over 45–70% of life-threatening events."],
-                          title_color=C_BLUE_PRIMARY, title_size=Pt(10.5), font_size=Pt(9.5),
-                          bg_color=C_CALLOUT_BG, border_color=C_BLUE_PRIMARY, item_space=Pt(1))
+                          title_color=C_BLUE_PRIMARY, title_size=Pt(11), font_size=Pt(10),
+                          bg_color=C_CALLOUT_BG, border_color=C_BLUE_PRIMARY, pad_x=Inches(0.20), pad_y=Inches(0.12),
+                          item_space=Pt(1), line_spacing=1.20)
 
     # =========================================================================
     # SLIDE 6: Proposed Methodology & 7-Stage Architecture (FIGURE 1)
@@ -510,7 +528,7 @@ def build_presentation():
 
     fig1_path = os.path.join(ASSETS_DIR, "figure1_architecture_block_diagram.jpg")
     if os.path.exists(fig1_path):
-        s6.shapes.add_picture(fig1_path, Inches(0.8), Inches(1.65), Inches(11.733), Inches(3.6))
+        s6.shapes.add_picture(fig1_path, Inches(0.80), Inches(1.68), Inches(11.733), Inches(3.50))
 
     stages = [
         ("1. Acquisition", "PhysioNet eICU & MIT-BIH benchmark."),
@@ -522,10 +540,11 @@ def build_presentation():
         ("7. Prototype", "FastAPI microservice & React 19 dashboard.")
     ]
     for idx, (st_name, st_desc) in enumerate(stages):
-        left_pos = Inches(0.8 + idx * 1.68)
-        add_card_with_content(s6, left_pos, Inches(5.45), Inches(1.64), Inches(1.55),
+        left_pos = Inches(0.80 + idx * 1.68)
+        add_card_with_content(s6, left_pos, Inches(5.35), Inches(1.62), Inches(1.55),
                               title=st_name, items=[st_desc], title_color=C_BLUE_PRIMARY,
-                              title_size=Pt(10), font_size=Pt(8.5), pad_x=Inches(0.08), pad_y=Inches(0.08))
+                              title_size=Pt(10.5), font_size=Pt(8.5), pad_x=Inches(0.10), pad_y=Inches(0.10),
+                              accent_color=C_BLUE_PRIMARY, corner_radius=0.045)
 
     # =========================================================================
     # SLIDE 7: Biomedical Signal Conditioning & Filtering
@@ -539,9 +558,11 @@ def build_presentation():
         ("50 Hz IIR Powerline Notch Filter (Q = 30)", "Sharp infinite impulse response notch suppresses electrical mains hum while preserving QRS frequency components:\nH_notch(z) = [1 - 2 cos(ω_0)z^-1 + z^-2] / [1 - 2r cos(ω_0)z^-1 + r^2 z^-2]"),
         ("Two-Stage Cascaded Median Filter", "Removes low-frequency baseline wander caused by respiration without distorting ST-segments:\nb[n] = med_W2(med_W1(x[n])),   x_c[n] = x[n] - b[n]\nWindows: W_1 = 0.20 f_s (200 ms) and W_2 = 0.60 f_s (600 ms).")
     ]
-    add_card_with_content(s7, Inches(0.8), Inches(1.65), Inches(5.70), Inches(5.35),
+    add_card_with_content(s7, Inches(0.80), Inches(1.68), Inches(5.70), Inches(5.20),
                           title="Mathematical Formulations & Filter Design", items=items_sc,
-                          title_color=C_NAVY_DARK, title_size=Pt(15), font_size=Pt(9.5), item_space=Pt(6))
+                          title_color=C_NAVY_DARK, title_size=Pt(16), font_size=Pt(10.5),
+                          pad_x=Inches(0.28), pad_y=Inches(0.22), item_space=Pt(12),
+                          line_spacing=1.22, accent_color=C_NAVY_DARK)
 
     items_sqi = [
         ("Kurtosis SQI (kSQI > 5.0)", "Evaluates the peakedness of the QRS complex. Normal physiological cardiac beats exhibit kSQI > 5.0; noisy, disconnected leads yield kSQI < 2.0."),
@@ -549,9 +570,11 @@ def build_presentation():
         ("Power Spectrum SQI (pSQI)", "Computes relative spectral energy concentration within the 5–15 Hz band (where genuine QRS electrical power concentrates) relative to the 1–40 Hz band."),
         ("Dynamic Lead Integrity Grading", "Signals failing SQI criteria trigger a 'Lead Disconnected / Artifact' alert rather than generating false cardiac arrest alarms, eliminating clinician fatigue.")
     ]
-    add_card_with_content(s7, Inches(6.83), Inches(1.65), Inches(5.70), Inches(5.35),
+    add_card_with_content(s7, Inches(6.83), Inches(1.68), Inches(5.70), Inches(5.20),
                           title="Signal Quality Index (SQI) Assessment", items=items_sqi,
-                          title_color=C_TEAL, title_size=Pt(15), font_size=Pt(10), item_space=Pt(6))
+                          title_color=C_TEAL, title_size=Pt(16), font_size=Pt(11),
+                          pad_x=Inches(0.28), pad_y=Inches(0.22), item_space=Pt(12),
+                          line_spacing=1.25, accent_color=C_TEAL)
 
     # =========================================================================
     # SLIDE 8: Pan-Tompkins QRS Detection & HRV Feature Extraction
@@ -566,9 +589,11 @@ def build_presentation():
         ("Moving-Window Integration (MWI)", "Integrates signal energy across window width W = 54 samples (150 ms at 360 Hz):\ny_MWI[n] = (1/W) ∑ [d/dt x_c[n-k]]^2"),
         ("Dual-Threshold Decision Logic", "Maintains running signal and noise peak thresholds (SPKI, NPKI). If no peak is detected within 166% of the average RR interval, a search-back is triggered.")
     ]
-    add_card_with_content(s8, Inches(0.8), Inches(1.65), Inches(5.70), Inches(5.35),
+    add_card_with_content(s8, Inches(0.80), Inches(1.68), Inches(5.70), Inches(5.20),
                           title="Pan-Tompkins Adaptive R-Peak Localization", items=items_pt,
-                          title_color=C_NAVY_DARK, title_size=Pt(15), font_size=Pt(10), item_space=Pt(6))
+                          title_color=C_NAVY_DARK, title_size=Pt(16), font_size=Pt(11),
+                          pad_x=Inches(0.28), pad_y=Inches(0.22), item_space=Pt(12),
+                          line_spacing=1.25, accent_color=C_NAVY_DARK)
 
     items_hrv = [
         ("SDNN (Autonomic Reserve)", "Standard deviation of normal-to-normal intervals:\nSDNN = √ [ (1/(M-1)) ∑ (RR_i - RR_mean)^2 ]\nSharp reduction in SDNN indicates systemic autonomic nervous system collapse."),
@@ -576,9 +601,11 @@ def build_presentation():
         ("pNN50 Index", "Percentage of adjacent RR intervals differing by > 50 ms."),
         ("LF / HF Spectral Ratio", "Welch PSD ratio between Low-Frequency (0.04–0.15 Hz) and High-Frequency (0.15–0.40 Hz). Surges during sympathetic storm preceding arrest.")
     ]
-    add_card_with_content(s8, Inches(6.83), Inches(1.65), Inches(5.70), Inches(5.35),
+    add_card_with_content(s8, Inches(6.83), Inches(1.68), Inches(5.70), Inches(5.20),
                           title="Heart Rate Variability (HRV) Biomarkers", items=items_hrv,
-                          title_color=C_BLUE_PRIMARY, title_size=Pt(15), font_size=Pt(10), item_space=Pt(6))
+                          title_color=C_BLUE_PRIMARY, title_size=Pt(16), font_size=Pt(10.5),
+                          pad_x=Inches(0.28), pad_y=Inches(0.22), item_space=Pt(11),
+                          line_spacing=1.22, accent_color=C_BLUE_PRIMARY)
 
     # =========================================================================
     # SLIDE 9: Leak-Free Preprocessing & 4-Way Consensus Feature Selection
@@ -593,9 +620,11 @@ def build_presentation():
         ("2.5× IQR Winsorization", "Outliers are bounded to [Q1 - 2.5×IQR, Q3 + 2.5×IQR]. This preserves physiological shock extremes (e.g., HR=165 bpm) without letting sensor glitches skew variance."),
         ("Zero-Test Contamination", "Validation (1,000) and Test (1,000) sets are transformed using frozen training parameters without re-estimation.")
     ]
-    add_card_with_content(s9, Inches(0.8), Inches(1.65), Inches(5.70), Inches(5.35),
+    add_card_with_content(s9, Inches(0.80), Inches(1.68), Inches(5.70), Inches(5.20),
                           title="Partition-Isolated Leak-Free Protocol", items=items_lf,
-                          title_color=C_NAVY_DARK, title_size=Pt(15), font_size=Pt(10), item_space=Pt(6))
+                          title_color=C_NAVY_DARK, title_size=Pt(16), font_size=Pt(11),
+                          pad_x=Inches(0.28), pad_y=Inches(0.22), item_space=Pt(12),
+                          line_spacing=1.25, accent_color=C_NAVY_DARK)
 
     items_fs = [
         ("1. Diastolic BP (Score: 0.4372)", "Gini: 0.3566 | Corr: -0.3349 | Mutual Info: 0.0575. Strongest single predictor of hypoperfusion and cardiac shock."),
@@ -604,10 +633,12 @@ def build_presentation():
         ("4. Patient Age (Score: 0.3159)", "Gini: 0.0913 | Corr: +0.1567 | Mutual Info: 0.0154. Reflects diminished physiological reserve."),
         ("Pruned Redundant Features", "Admission Time & Scaled Stay had zero mutual info and induced multi-collinearity; safely eliminated.")
     ]
-    add_card_with_content(s9, Inches(6.83), Inches(1.65), Inches(5.70), Inches(5.35),
+    add_card_with_content(s9, Inches(6.83), Inches(1.68), Inches(5.70), Inches(5.20),
                           title="4-Way Consensus Feature Selection", items=items_fs,
                           formula="S_comp(f_k) = 0.25|r(f_k, Y)| + 0.25 I(f_k; Y) + 0.25 G_RF(f_k) + 0.25 (Rank_RFE(f_k))^-1",
-                          title_color=C_TEAL, title_size=Pt(15), font_size=Pt(9.5), item_space=Pt(5))
+                          title_color=C_TEAL, title_size=Pt(16), font_size=Pt(10),
+                          pad_x=Inches(0.28), pad_y=Inches(0.20), item_space=Pt(8),
+                          line_spacing=1.20, accent_color=C_TEAL)
 
     # =========================================================================
     # SLIDE 10: Class Imbalance & The Safety-Prioritized CDSI Metric
@@ -621,9 +652,11 @@ def build_presentation():
         ("Cost-Sensitive Cross-Entropy Loss", "Heavily penalizes minority-class errors via inverse frequency weighting:\nL_w(θ) = - ∑ [ w_1 y_i log p_i(θ) + w_0 (1 - y_i) log(1 - p_i(θ)) ]\nwhere w_c = N / (2 N_c)."),
         ("Platt Sigmoid Probability Calibration", "Maps raw decision values into true empirical likelihoods:\nP_hat(Y=1|x) = 1 / [ 1 + exp(-(A · f(x) + B)) ]\nEnsures generated risk scores correspond to real patient collapse risk.")
     ]
-    add_card_with_content(s10, Inches(0.8), Inches(1.65), Inches(5.70), Inches(5.35),
+    add_card_with_content(s10, Inches(0.80), Inches(1.68), Inches(5.70), Inches(5.20),
                           title="Cost-Sensitive Loss & Platt Calibration", items=items_imb,
-                          title_color=C_NAVY_DARK, title_size=Pt(15), font_size=Pt(10), item_space=Pt(6))
+                          title_color=C_NAVY_DARK, title_size=Pt(16), font_size=Pt(10.5),
+                          pad_x=Inches(0.28), pad_y=Inches(0.22), item_space=Pt(12),
+                          line_spacing=1.22, accent_color=C_NAVY_DARK)
 
     items_cdsi = [
         ("Sensitivity Weight (0.40)", "The primary clinical imperative: identify as many deteriorating patients as possible early."),
@@ -632,10 +665,12 @@ def build_presentation():
         ("Specificity Weight (0.15)", "Suppresses excessive false alarms to protect bedside staff from sensory alarm fatigue."),
         ("FNR Direct Penalty (-0.10)", "Direct mathematical deduction for each missed dying patient. Penalizes models that achieve high accuracy by sacrificing sensitivity.")
     ]
-    add_card_with_content(s10, Inches(6.83), Inches(1.65), Inches(5.70), Inches(5.35),
+    add_card_with_content(s10, Inches(6.83), Inches(1.68), Inches(5.70), Inches(5.20),
                           title="Clinical Decision Support Index (CDSI)", items=items_cdsi,
                           formula="CDSI = 0.40·Sens + 0.25·PR-AUC + 0.20·ROC-AUC + 0.15·Spec - 0.10·FNR",
-                          title_color=C_BLUE_PRIMARY, title_size=Pt(15), font_size=Pt(9.5), item_space=Pt(5))
+                          title_color=C_BLUE_PRIMARY, title_size=Pt(16), font_size=Pt(10),
+                          pad_x=Inches(0.28), pad_y=Inches(0.20), item_space=Pt(8),
+                          line_spacing=1.20, accent_color=C_BLUE_PRIMARY)
 
     # =========================================================================
     # SLIDE 11: Deep 1D-CNN Architecture for Continuous ECG
@@ -651,9 +686,11 @@ def build_presentation():
         ("Conv Block 3 (Global Morphology)", "Conv1D(32 -> 64, k=3, s=1, p=1) -> BatchNorm1D -> ReLU -> AdaptiveAvgPool1D(8) -> Dropout(0.3). Produces invariant 512-dim embedding."),
         ("Dense Classification Head", "Linear(512 -> 32) -> ReLU -> Linear(32 -> 2) with Softmax for Normal vs. Ventricular Ectopy (PVC).")
     ]
-    add_card_with_content(s11, Inches(0.8), Inches(1.65), Inches(5.70), Inches(5.35),
+    add_card_with_content(s11, Inches(0.80), Inches(1.68), Inches(5.70), Inches(5.20),
                           title="Layer-by-Layer Architectural Pipeline", items=items_cnn,
-                          title_color=C_NAVY_DARK, title_size=Pt(15), font_size=Pt(9.5), item_space=Pt(5))
+                          title_color=C_NAVY_DARK, title_size=Pt(16), font_size=Pt(10),
+                          pad_x=Inches(0.28), pad_y=Inches(0.20), item_space=Pt(8),
+                          line_spacing=1.20, accent_color=C_NAVY_DARK)
 
     items_cp = [
         ("Zero Patient Overlap", "Evaluated on 10 unseen holdout patients (PAT_102 to PAT_148) with 100 beats. Overlap = 0."),
@@ -662,9 +699,11 @@ def build_presentation():
         ("Ultra-Fast Bedside Latency", "Takes only 4.2 ms per heartbeat (Filtering: 2.1 ms, Pan-Tompkins: 1.3 ms, 1D-CNN: 0.8 ms)."),
         ("Zero Cloud Dependency", "Runs natively in PyTorch CPU runtime without requiring specialized GPU accelerators.")
     ]
-    add_card_with_content(s11, Inches(6.83), Inches(1.65), Inches(5.70), Inches(5.35),
+    add_card_with_content(s11, Inches(6.83), Inches(1.68), Inches(5.70), Inches(5.20),
                           title="Audited Patient-Holdout Validation", items=items_cp,
-                          title_color=C_TEAL, title_size=Pt(15), font_size=Pt(10), item_space=Pt(6))
+                          title_color=C_TEAL, title_size=Pt(16), font_size=Pt(10.5),
+                          pad_x=Inches(0.28), pad_y=Inches(0.22), item_space=Pt(10),
+                          line_spacing=1.22, accent_color=C_TEAL)
 
     # =========================================================================
     # SLIDE 12: Experimental Setup & Clinical Benchmark Cohorts (Table II)
@@ -679,24 +718,26 @@ def build_presentation():
         ["2. MIMIC Secondary\nCOHORT-MIMIC", "MIMIC-IV-Ext-MDS-ED\n(Multimodal Emergency)", "129,095 Records\n(Filtered Missing -999)", "Bedside Vitals, Triage Acuity, 2,408 Parameters", "Acute Deterioration /\nHypoperfusion Shock"],
         ["3. MIT-BIH Tertiary\nCOHORT-MITDB", "MIT-BIH Arrhythmia Database\n(Ambulatory 360 Hz ECG)", "48 Discrete Patients\n(38 Train / 10 Test Holdout)", "Zero-Phase Filtered Signals, QRS Width, HRV Indices", "Ventricular Ectopy (PVCs)\nvs. Normal Sinus Rhythm"]
     ]
-    col_w_t2 = [Inches(2.4), Inches(2.3), Inches(2.4), Inches(2.4), Inches(2.233)]
-    create_table(s12, Inches(0.8), Inches(1.65), Inches(11.733), Inches(3.2), headers_t2, rows_t2, col_widths=col_w_t2)
+    col_w_t2 = [Inches(2.40), Inches(2.30), Inches(2.40), Inches(2.40), Inches(2.233)]
+    create_table(s12, Inches(0.80), Inches(1.68), Inches(11.733), Inches(3.10), headers_t2, rows_t2, col_widths=col_w_t2)
 
     items_pi = [
         ("80/10/10 Split", "8,000 train, 1,000 validation, and 1,000 dedicated holdout test patients."),
         ("No Cross-Contamination", "Scaling, imputation medians, and winsorization thresholds calculated exclusively on training set.")
     ]
-    add_card_with_content(s12, Inches(0.8), Inches(5.05), Inches(5.70), Inches(1.95),
+    add_card_with_content(s12, Inches(0.80), Inches(4.98), Inches(5.70), Inches(1.95),
                           title="Strict Partition Isolation Guarantee", items=items_pi,
-                          title_color=C_NAVY_DARK, title_size=Pt(12), font_size=Pt(9.5), item_space=Pt(3))
+                          title_color=C_NAVY_DARK, title_size=Pt(13), font_size=Pt(10),
+                          pad_x=Inches(0.20), pad_y=Inches(0.14), item_space=Pt(4), line_spacing=1.18)
 
     items_ep = [
         ("Beyond Naive Accuracy", "Evaluates Sensitivity, Specificity, Precision, F1, ROC-AUC, PR-AUC, FPR, FNR, and CDSI."),
         ("Statistical Significance", "Validated via two-tailed paired t-test and Wilcoxon signed-rank test across cross-validation folds.")
     ]
-    add_card_with_content(s12, Inches(6.83), Inches(5.05), Inches(5.70), Inches(1.95),
+    add_card_with_content(s12, Inches(6.83), Inches(4.98), Inches(5.70), Inches(1.95),
                           title="Comprehensive 11-Metric Evaluation Protocol", items=items_ep,
-                          title_color=C_BLUE_PRIMARY, title_size=Pt(12), font_size=Pt(9.5), item_space=Pt(3))
+                          title_color=C_BLUE_PRIMARY, title_size=Pt(13), font_size=Pt(10),
+                          pad_x=Inches(0.20), pad_y=Inches(0.14), item_space=Pt(4), line_spacing=1.18)
 
     # =========================================================================
     # SLIDE 13: Comparative Experimental Results Across All 7 Models (Table III)
@@ -715,17 +756,18 @@ def build_presentation():
         ["6. Logistic Reg. (Balanced) [Optimal]", "0.713", "0.701", "0.716", "0.402", "0.511", "0.796", "0.543", "0.299", "0.653", "Rank 1"],
         ["7. 1D-CNN (ECG Waveform)", "0.950", "0.722", "1.000", "1.000", "0.839", "0.990", "0.959", "0.278", "0.849", "Waveform"]
     ]
-    col_w_t3 = [Inches(2.5), Inches(0.9), Inches(1.0), Inches(1.0), Inches(0.9), Inches(0.9), Inches(1.0), Inches(0.9), Inches(0.9), Inches(0.9), Inches(0.833)]
-    create_table(s13, Inches(0.8), Inches(1.65), Inches(11.733), Inches(3.6), headers_t3, rows_t3, col_widths=col_w_t3)
+    col_w_t3 = [Inches(2.50), Inches(0.90), Inches(1.00), Inches(1.00), Inches(0.90), Inches(0.90), Inches(1.00), Inches(0.90), Inches(0.90), Inches(0.90), Inches(0.833)]
+    create_table(s13, Inches(0.80), Inches(1.68), Inches(11.733), Inches(3.60), headers_t3, rows_t3, col_widths=col_w_t3)
 
     items_t3_hl = [
         ("Rank 1 Selection", "Balanced Logistic Regression achieves the highest CDSI score (0.6527), capturing 150/214 deteriorating patients (70.09% sensitivity) with a low 29.91% FNR."),
         ("The Accuracy Paradox Exposed", "The Artificial Neural Network achieved 81.80% accuracy but suffered a catastrophic 71.03% False Negative Rate, missing 152 dying patients. In critical care, naive accuracy is a lethal metric.")
     ]
-    add_card_with_content(s13, Inches(0.8), Inches(5.45), Inches(11.733), Inches(1.55),
+    add_card_with_content(s13, Inches(0.80), Inches(5.48), Inches(11.733), Inches(1.45),
                           title="KEY CLINICAL TAKEAWAY FROM BENCHMARK TABLE:", items=items_t3_hl,
-                          title_color=C_TEAL, title_size=Pt(11), font_size=Pt(9.5),
-                          bg_color=RGBColor(240, 253, 250), border_color=C_TEAL, item_space=Pt(3))
+                          title_color=C_TEAL, title_size=Pt(11.5), font_size=Pt(10),
+                          bg_color=RGBColor(240, 253, 250), border_color=C_TEAL,
+                          pad_x=Inches(0.20), pad_y=Inches(0.12), item_space=Pt(4), line_spacing=1.18)
 
     # =========================================================================
     # SLIDE 14: The Accuracy Paradox in Critical Care Medicine
@@ -741,10 +783,12 @@ def build_presentation():
         ("True Positives (TP)", "Only 62 / 214 deteriorating patients caught."),
         ("The Fatal Flaw", "Because 78.6% of the cohort is stable, the network achieves 81.8% accuracy simply by predicting 'Stable' on almost everyone. In an ICU, these 152 missed patients would experience unmonitored cardiac arrest.")
     ]
-    add_card_with_content(s14, Inches(0.8), Inches(1.65), Inches(5.70), Inches(5.35),
+    add_card_with_content(s14, Inches(0.80), Inches(1.68), Inches(5.70), Inches(5.20),
                           title="Artificial Neural Network (Unweighted MLP)",
                           subtitle="Nominal Accuracy: 81.80% | CDSI Score: 0.4848 (Rank 5)",
-                          items=items_cm_ann, title_color=C_RED_ALERT, title_size=Pt(15), font_size=Pt(10), item_space=Pt(5))
+                          items=items_cm_ann, title_color=C_RED_ALERT, title_size=Pt(15.5), font_size=Pt(10.5),
+                          pad_x=Inches(0.28), pad_y=Inches(0.22), item_space=Pt(8),
+                          line_spacing=1.20, accent_color=C_RED_ALERT, border_color=C_RED_ALERT)
 
     items_cm_lr = [
         ("True Negatives (TN)", "563 stable patients correctly identified."),
@@ -753,10 +797,12 @@ def build_presentation():
         ("True Positives (TP)", "150 / 214 deteriorating patients caught!"),
         ("The Clinical Victory", "Catches 88 MORE dying patients than the neural network! The false alarms represent manageable clinical check-ups, whereas the reduced false negatives save human lives.")
     ]
-    add_card_with_content(s14, Inches(6.83), Inches(1.65), Inches(5.70), Inches(5.35),
+    add_card_with_content(s14, Inches(6.83), Inches(1.68), Inches(5.70), Inches(5.20),
                           title="Balanced Logistic Regression (Optimal CDSI)",
                           subtitle="Nominal Accuracy: 71.30% | CDSI Score: 0.6527 (Rank 1)",
-                          items=items_cm_lr, title_color=C_GREEN_SAFE, title_size=Pt(15), font_size=Pt(10), item_space=Pt(5))
+                          items=items_cm_lr, title_color=C_GREEN_SAFE, title_size=Pt(15.5), font_size=Pt(10.5),
+                          pad_x=Inches(0.28), pad_y=Inches(0.22), item_space=Pt(8),
+                          line_spacing=1.20, accent_color=C_GREEN_SAFE, border_color=C_GREEN_SAFE)
 
     # =========================================================================
     # SLIDE 15: Research Visualizations (ROC & PR Curves)
@@ -769,13 +815,13 @@ def build_presentation():
     pr_path = os.path.join(GRAPHS_DIR, "precision_recall_curves.png")
 
     if os.path.exists(roc_path):
-        s15.shapes.add_picture(roc_path, Inches(0.8), Inches(1.65), Inches(5.70), Inches(4.35))
+        s15.shapes.add_picture(roc_path, Inches(0.80), Inches(1.68), Inches(5.70), Inches(4.25))
     if os.path.exists(pr_path):
-        s15.shapes.add_picture(pr_path, Inches(6.83), Inches(1.65), Inches(5.70), Inches(4.35))
+        s15.shapes.add_picture(pr_path, Inches(6.83), Inches(1.68), Inches(5.70), Inches(4.25))
 
-    add_card_with_content(s15, Inches(0.8), Inches(6.15), Inches(11.733), Inches(0.85),
+    add_card_with_content(s15, Inches(0.80), Inches(6.08), Inches(11.733), Inches(0.88),
                           items=["DIAGNOSTIC SEPARATION SUMMARY: Logistic Regression achieves ROC-AUC of 0.7959 (p < 0.001). Under 21.4% cohort prevalence, the PR-AUC of 0.5426 represents a 2.54× lift above naive chance, ensuring reliable positive alert fidelity."],
-                          font_size=Pt(10), pad_x=Inches(0.12), pad_y=Inches(0.08))
+                          font_size=Pt(10), pad_x=Inches(0.18), pad_y=Inches(0.10))
 
     # =========================================================================
     # SLIDE 16: Feature Importance & Audited 1D-CNN Figures
@@ -788,13 +834,13 @@ def build_presentation():
     cnn_path = os.path.join(GRAPHS_DIR, "ecg_cnn_eval.png")
 
     if os.path.exists(fi_path):
-        s16.shapes.add_picture(fi_path, Inches(0.8), Inches(1.65), Inches(5.70), Inches(4.35))
+        s16.shapes.add_picture(fi_path, Inches(0.80), Inches(1.68), Inches(5.70), Inches(4.25))
     if os.path.exists(cnn_path):
-        s16.shapes.add_picture(cnn_path, Inches(6.83), Inches(1.65), Inches(5.70), Inches(4.35))
+        s16.shapes.add_picture(cnn_path, Inches(6.83), Inches(1.68), Inches(5.70), Inches(4.25))
 
-    add_card_with_content(s16, Inches(0.8), Inches(6.15), Inches(11.733), Inches(0.85),
+    add_card_with_content(s16, Inches(0.80), Inches(6.08), Inches(11.733), Inches(0.88),
                           items=["PHYSIOLOGICAL & WAVEFORM INSIGHTS: Left: Diastolic BP (Gini: 0.357) and Respiratory Rate (0.253) dominate shock prediction. Right: Audited 1D-CNN achieves 95.0% accuracy and 0.9898 ROC-AUC on 10 unseen patients with zero false positives."],
-                          font_size=Pt(10), pad_x=Inches(0.12), pad_y=Inches(0.08))
+                          font_size=Pt(10), pad_x=Inches(0.18), pad_y=Inches(0.10))
 
     # =========================================================================
     # SLIDE 17: Systematic Architectural Ablation Study (Table IV)
@@ -811,24 +857,26 @@ def build_presentation():
         ["w/o 2.5× IQR Winsorization", "62.06%", "68.21%", "37.94%", "0.5781", "-11.5% CDSI drop; sensor glitches distort decision boundary."],
         ["w/o Zero-Phase Butterworth", "58.33%", "81.25%", "41.67%", "0.5620", "-13.9% CDSI drop; baseline wander corrupts QRS detection."]
     ]
-    col_w_t4 = [Inches(3.2), Inches(1.3), Inches(1.3), Inches(1.3), Inches(1.3), Inches(3.333)]
-    create_table(s17, Inches(0.8), Inches(1.65), Inches(11.733), Inches(3.2), headers_t4, rows_t4, col_widths=col_w_t4)
+    col_w_t4 = [Inches(3.20), Inches(1.30), Inches(1.30), Inches(1.30), Inches(1.30), Inches(3.333)]
+    create_table(s17, Inches(0.80), Inches(1.68), Inches(11.733), Inches(3.10), headers_t4, rows_t4, col_widths=col_w_t4)
 
     items_ab1 = [
         ("Catastrophic Sensitivity Collapse", "Removing class balancing causes sensitivity to collapse from 70.09% to 28.97%."),
         ("Direct Mathematical Cause", "Unweighted loss treats false negatives and false positives equally, failing in skewed clinical settings.")
     ]
-    add_card_with_content(s17, Inches(0.8), Inches(5.05), Inches(5.70), Inches(1.95),
+    add_card_with_content(s17, Inches(0.80), Inches(4.98), Inches(5.70), Inches(1.95),
                           title="Loss Function Balancing is Crucial", items=items_ab1,
-                          title_color=C_RED_ALERT, title_size=Pt(12), font_size=Pt(9.5), item_space=Pt(3))
+                          title_color=C_RED_ALERT, title_size=Pt(12.5), font_size=Pt(10),
+                          pad_x=Inches(0.20), pad_y=Inches(0.14), item_space=Pt(4), line_spacing=1.18, accent_color=C_RED_ALERT)
 
     items_ab2 = [
         ("Butterworth Filter Impact", "Omitting zero-phase Butterworth filtering reduces 1D-CNN beat sensitivity to 58.33%."),
         ("Winsorization Necessity", "Outlier bounding prevents ICU sensor artifacts from degrading decision boundaries.")
     ]
-    add_card_with_content(s17, Inches(6.83), Inches(5.05), Inches(5.70), Inches(1.95),
+    add_card_with_content(s17, Inches(6.83), Inches(4.98), Inches(5.70), Inches(1.95),
                           title="Signal Conditioning is Indispensable", items=items_ab2,
-                          title_color=C_BLUE_PRIMARY, title_size=Pt(12), font_size=Pt(9.5), item_space=Pt(3))
+                          title_color=C_BLUE_PRIMARY, title_size=Pt(12.5), font_size=Pt(10),
+                          pad_x=Inches(0.20), pad_y=Inches(0.14), item_space=Pt(4), line_spacing=1.18, accent_color=C_BLUE_PRIMARY)
 
     # =========================================================================
     # SLIDE 18: Real-Time Latency, Throughput & Edge Deployment
@@ -837,11 +885,10 @@ def build_presentation():
     set_slide_background(s18, C_BG_LIGHT)
     add_header(s18, "Edge Deployment", "Real-Time Inference Latency & Streaming Throughput", "Profiling multi-modal latency, CPU utilization, and edge deployment feasibility")
 
-    # 4 KPI badges
-    add_metric_badge(s18, Inches(0.8), Inches(1.65), Inches(2.75), Inches(1.35), "3.1 ms", "Tabular Risk Scoring", "Imputation + Winsorization + Model", val_color=C_BLUE_PRIMARY)
-    add_metric_badge(s18, Inches(3.79), Inches(1.65), Inches(2.75), Inches(1.35), "4.2 ms", "ECG Beat Inference", "Butterworth + Pan-Tompkins + 1D-CNN", val_color=C_TEAL)
-    add_metric_badge(s18, Inches(6.78), Inches(1.65), Inches(2.75), Inches(1.35), "240,000+", "Evaluations / Minute", "Simultaneous streaming bedside capacity", val_color=C_GREEN_SAFE)
-    add_metric_badge(s18, Inches(9.77), Inches(1.65), Inches(2.75), Inches(1.35), "< 12.4%", "Host CPU Utilization", "Commodity 8-Core PC with 285 MB RAM", val_color=C_AMBER)
+    add_metric_badge(s18, Inches(0.80), Inches(1.68), Inches(2.75), Inches(1.30), "3.1 ms", "Tabular Risk Scoring", "Imputation + Winsorization + Model", val_color=C_BLUE_PRIMARY)
+    add_metric_badge(s18, Inches(3.79), Inches(1.68), Inches(2.75), Inches(1.30), "4.2 ms", "ECG Beat Inference", "Butterworth + Pan-Tompkins + 1D-CNN", val_color=C_TEAL)
+    add_metric_badge(s18, Inches(6.78), Inches(1.68), Inches(2.75), Inches(1.30), "240,000+", "Evaluations / Minute", "Simultaneous streaming bedside capacity", val_color=C_GREEN_SAFE)
+    add_metric_badge(s18, Inches(9.77), Inches(1.68), Inches(2.75), Inches(1.30), "< 12.4%", "Host CPU Utilization", "Commodity 8-Core PC with 285 MB RAM", val_color=C_AMBER)
 
     items_l1 = [
         ("Tabular Preprocessing (0.4 ms)", "Median imputation and 2.5× IQR winsorization executed in vectorized NumPy operations."),
@@ -851,9 +898,10 @@ def build_presentation():
         ("Pan-Tompkins Localization (1.3 ms)", "Real-time derivative squaring and moving window integration."),
         ("PyTorch 1D-CNN Beat Inference (0.8 ms)", "Highly optimized 3-layer convolutional forward pass.")
     ]
-    add_card_with_content(s18, Inches(0.8), Inches(3.20), Inches(5.70), Inches(3.85),
+    add_card_with_content(s18, Inches(0.80), Inches(3.22), Inches(5.70), Inches(3.70),
                           title="Granular Latency Profiling", items=items_l1,
-                          title_color=C_NAVY_DARK, title_size=Pt(14), font_size=Pt(9.5), item_space=Pt(4))
+                          title_color=C_NAVY_DARK, title_size=Pt(14.5), font_size=Pt(10),
+                          pad_x=Inches(0.24), pad_y=Inches(0.18), item_space=Pt(6), line_spacing=1.18, accent_color=C_NAVY_DARK)
 
     items_l2 = [
         ("Deterministic High Throughput", "Stress-tested across 1,000 concurrent streaming patient feeds: > 240,000 evaluations/min with zero buffer overflow or memory leaks."),
@@ -861,9 +909,10 @@ def build_presentation():
         ("Zero Cloud Dependency", "Entire pipeline executes locally on bedside workstations; no patient data leaves the hospital network, preserving complete HIPAA compliance."),
         ("Bypassing Proprietary Costs", "Replaces expensive multi-million dollar vendor black-box systems with an open, fully explainable clinical engine.")
     ]
-    add_card_with_content(s18, Inches(6.83), Inches(3.20), Inches(5.70), Inches(3.85),
+    add_card_with_content(s18, Inches(6.83), Inches(3.22), Inches(5.70), Inches(3.70),
                           title="Enterprise Bedside Deployment Feasibility", items=items_l2,
-                          title_color=C_TEAL, title_size=Pt(14), font_size=Pt(9.5), item_space=Pt(4))
+                          title_color=C_TEAL, title_size=Pt(14.5), font_size=Pt(10.5),
+                          pad_x=Inches(0.24), pad_y=Inches(0.18), item_space=Pt(8), line_spacing=1.20, accent_color=C_TEAL)
 
     # =========================================================================
     # SLIDE 19: Statistical Significance & Hypothesis Testing
@@ -878,27 +927,30 @@ def build_presentation():
         ("Statistical Metrics", "t(99) = 38.45\np = 2.4 × 10^-9 (p < 0.001)"),
         ("Clinical Conclusion", "The null hypothesis is rejected with extreme significance. Balanced models deliver deterministic patient rescue improvements.")
     ]
-    add_card_with_content(s19, Inches(0.8), Inches(1.65), Inches(3.70), Inches(5.35),
+    add_card_with_content(s19, Inches(0.80), Inches(1.68), Inches(3.70), Inches(5.20),
                           title="Paired Student's t-Test", items=items_s1,
-                          title_color=C_BLUE_PRIMARY, title_size=Pt(14), font_size=Pt(9.5), item_space=Pt(6))
+                          title_color=C_BLUE_PRIMARY, title_size=Pt(14.5), font_size=Pt(10),
+                          pad_x=Inches(0.20), pad_y=Inches(0.20), item_space=Pt(11), line_spacing=1.22, accent_color=C_BLUE_PRIMARY)
 
     items_s2 = [
         ("Non-Parametric Testing", "Accounts for potential non-normal distribution of clinical patient deterioration data."),
         ("Test Statistics", "W = 0\nZ = -5.82\np = 3.6 × 10^-8 (p < 0.001)"),
         ("Consistency Verification", "Zero fold reversals observed; the proposed safety framework outperformed baseline models across 100% of tested iterations.")
     ]
-    add_card_with_content(s19, Inches(4.81), Inches(1.65), Inches(3.70), Inches(5.35),
+    add_card_with_content(s19, Inches(4.82), Inches(1.68), Inches(3.70), Inches(5.20),
                           title="Wilcoxon Signed-Rank", items=items_s2,
-                          title_color=C_TEAL, title_size=Pt(14), font_size=Pt(9.5), item_space=Pt(6))
+                          title_color=C_TEAL, title_size=Pt(14.5), font_size=Pt(10),
+                          pad_x=Inches(0.20), pad_y=Inches(0.20), item_space=Pt(11), line_spacing=1.22, accent_color=C_TEAL)
 
     items_s3 = [
         ("99.9% Bootstrapped CI", "CDSI Score: [0.641, 0.665]\nSensitivity: [68.8%, 71.4%]\nSpecificity: [70.2%, 73.1%]"),
         ("Diagnostic Stability", "Narrow confidence bounds prove high diagnostic stability amid ICU workload spikes and sensor noise."),
         ("Reproducibility Guarantee", "Guarantees reliable hospital performance regardless of emergency admission fluctuations.")
     ]
-    add_card_with_content(s19, Inches(8.82), Inches(1.65), Inches(3.70), Inches(5.35),
+    add_card_with_content(s19, Inches(8.83), Inches(1.68), Inches(3.70), Inches(5.20),
                           title="Confidence Intervals", items=items_s3,
-                          title_color=C_GREEN_SAFE, title_size=Pt(14), font_size=Pt(9.5), item_space=Pt(6))
+                          title_color=C_GREEN_SAFE, title_size=Pt(14.5), font_size=Pt(10),
+                          pad_x=Inches(0.20), pad_y=Inches(0.20), item_space=Pt(11), line_spacing=1.22, accent_color=C_GREEN_SAFE)
 
     # =========================================================================
     # SLIDE 20: Clinical Explainability & Patient Trajectory Case Studies
@@ -929,10 +981,11 @@ def build_presentation():
     ]
 
     for idx, (c_name, c_color, c_items) in enumerate(cases):
-        left_pos = Inches(0.8 + idx * 4.01)
-        add_card_with_content(s20, left_pos, Inches(1.65), Inches(3.70), Inches(5.35),
+        left_pos = Inches(0.80 + idx * 4.015)
+        add_card_with_content(s20, left_pos, Inches(1.68), Inches(3.70), Inches(5.20),
                               title=c_name, items=c_items, title_color=c_color,
-                              title_size=Pt(13.5), font_size=Pt(9.5), item_space=Pt(5))
+                              title_size=Pt(14), font_size=Pt(10), pad_x=Inches(0.20), pad_y=Inches(0.20),
+                              item_space=Pt(10), line_spacing=1.22, accent_color=c_color)
 
     # =========================================================================
     # SLIDE 21: Physician-in-the-Loop Workflow & Lifecycle (FIGURE 2)
@@ -943,7 +996,7 @@ def build_presentation():
 
     fig2_path = os.path.join(ASSETS_DIR, "figure2_clinical_workflow.jpg")
     if os.path.exists(fig2_path):
-        s21.shapes.add_picture(fig2_path, Inches(0.8), Inches(1.65), Inches(6.5), Inches(5.35))
+        s21.shapes.add_picture(fig2_path, Inches(0.80), Inches(1.68), Inches(6.50), Inches(5.20))
 
     items_wf = [
         ("1. Telemetry Ingestion", "Continuous ingestion of 360 Hz ECG waveforms and bedside multi-parameter vitals."),
@@ -954,9 +1007,10 @@ def build_presentation():
         ("Branch A: True Deterioration", "Instant dispatch of Rapid Response Team (RRT) for life-saving volume resuscitation."),
         ("Branch B: Benign Artifact", "Physician dismisses alert (DELETE /api/alerts/{id}); reason logged in immutable SQLite audit ledger.")
     ]
-    add_card_with_content(s21, Inches(7.55), Inches(1.65), Inches(4.98), Inches(5.35),
+    add_card_with_content(s21, Inches(7.55), Inches(1.68), Inches(4.98), Inches(5.20),
                           title="Operational Workflow Phases", items=items_wf,
-                          title_color=C_NAVY_DARK, title_size=Pt(14), font_size=Pt(9.5), item_space=Pt(4))
+                          title_color=C_NAVY_DARK, title_size=Pt(15), font_size=Pt(9.5),
+                          pad_x=Inches(0.22), pad_y=Inches(0.20), item_space=Pt(6), line_spacing=1.18, accent_color=C_NAVY_DARK)
 
     # =========================================================================
     # SLIDE 22: Full-Stack Healthcare Software Architecture
@@ -967,7 +1021,7 @@ def build_presentation():
 
     dash_img = os.path.join(PROJECT_ROOT, "browser_evidence", "6653ec40-bbe4-4f03-ada8-b780b176cee1", "final_step_20.png")
     if os.path.exists(dash_img):
-        s22.shapes.add_picture(dash_img, Inches(0.8), Inches(1.65), Inches(6.5), Inches(4.2))
+        s22.shapes.add_picture(dash_img, Inches(0.80), Inches(1.68), Inches(6.50), Inches(4.15))
 
     items_fsd = [
         ("Frontend Presentation Tier", "React 19 + TypeScript + Vite + Tailwind CSS. 8 responsive modules: Home Dashboard, Dataset Explorer, ECG Analysis, Risk Calculator, Training, Performance, History, and Reports."),
@@ -975,14 +1029,15 @@ def build_presentation():
         ("Data & Persistence Tier", "Embedded SQLite audit ledger (metadata.db) recording all predictions and feedback. Joblib & PyTorch serialized model registry."),
         ("Automated Test Verification", "12/12 unit and integration tests passing in 2.31s (test_pipeline.py and test_router_endpoints.py).")
     ]
-    add_card_with_content(s22, Inches(7.55), Inches(1.65), Inches(4.98), Inches(5.35),
+    add_card_with_content(s22, Inches(7.55), Inches(1.68), Inches(4.98), Inches(5.20),
                           title="3-Tier Decoupled Architecture", items=items_fsd,
-                          title_color=C_BLUE_PRIMARY, title_size=Pt(14), font_size=Pt(9.5), item_space=Pt(5))
+                          title_color=C_BLUE_PRIMARY, title_size=Pt(15), font_size=Pt(10),
+                          pad_x=Inches(0.22), pad_y=Inches(0.20), item_space=Pt(8), line_spacing=1.20, accent_color=C_BLUE_PRIMARY)
 
-    add_card_with_content(s22, Inches(0.8), Inches(6.0), Inches(6.5), Inches(1.0),
+    add_card_with_content(s22, Inches(0.80), Inches(5.98), Inches(6.50), Inches(0.90),
                           items=["LIVE CLINICAL WORKSTATION: Deployed and verified on http://localhost:8000 with complete interactive telemetry viewers, real-time risk calculators, and report downloads."],
                           font_size=Pt(9.5), bg_color=RGBColor(240, 253, 250), border_color=C_TEAL,
-                          pad_x=Inches(0.12), pad_y=Inches(0.08))
+                          pad_x=Inches(0.16), pad_y=Inches(0.10))
 
     # =========================================================================
     # SLIDE 23: Clinical Implications & Translational Value
@@ -997,9 +1052,11 @@ def build_presentation():
         ("Closed-Loop Feedback Audit Ledger", "Every alert dismissal or confirmation is logged in SQLite, creating an immutable institutional audit trail for clinical quality improvement and morbidity/mortality audits."),
         ("Enhanced Nurse-to-Patient Ratio Support", "Augments bedside nursing teams, allowing high-fidelity continuous surveillance across multi-bed ICUs.")
     ]
-    add_card_with_content(s23, Inches(0.8), Inches(1.65), Inches(5.70), Inches(5.35),
+    add_card_with_content(s23, Inches(0.80), Inches(1.68), Inches(5.70), Inches(5.20),
                           title="Hospital Workflow & Patient Outcomes", items=items_imp1,
-                          title_color=C_NAVY_DARK, title_size=Pt(15), font_size=Pt(10), item_space=Pt(6))
+                          title_color=C_NAVY_DARK, title_size=Pt(16.5), font_size=Pt(11),
+                          pad_x=Inches(0.28), pad_y=Inches(0.24), item_space=Pt(12),
+                          line_spacing=1.25, accent_color=C_NAVY_DARK)
 
     items_imp2 = [
         ("Bypassing Vendor Lock-In", "Eliminates multi-million dollar annual licensing fees for proprietary monitoring technologies by utilizing an open-source, reproducible Python/FastAPI architecture."),
@@ -1007,9 +1064,11 @@ def build_presentation():
         ("Deployment in Regional Hospitals", "Enables rural, community, and regional healthcare centers with constrained budgets to deploy enterprise-grade AI patient surveillance."),
         ("SaMD Regulatory Alignment", "Engineered as an explainable Clinical Decision Support System (CDSS) that augments rather than replaces physician diagnosis.")
     ]
-    add_card_with_content(s23, Inches(6.83), Inches(1.65), Inches(5.70), Inches(5.35),
+    add_card_with_content(s23, Inches(6.83), Inches(1.68), Inches(5.70), Inches(5.20),
                           title="Economic & Technological Democratization", items=items_imp2,
-                          title_color=C_TEAL, title_size=Pt(15), font_size=Pt(10), item_space=Pt(6))
+                          title_color=C_TEAL, title_size=Pt(16.5), font_size=Pt(11),
+                          pad_x=Inches(0.28), pad_y=Inches(0.24), item_space=Pt(12),
+                          line_spacing=1.25, accent_color=C_TEAL)
 
     # =========================================================================
     # SLIDE 24: Technical & Clinical Limitations
@@ -1034,10 +1093,11 @@ def build_presentation():
     ]
 
     for idx, (l_title, l_color, l_items) in enumerate(lims):
-        top_pos = Inches(1.65 + idx * 1.78)
-        add_card_with_content(s24, Inches(0.8), top_pos, Inches(11.733), Inches(1.65),
+        top_pos = Inches(1.68 + idx * 1.78)
+        add_card_with_content(s24, Inches(0.80), top_pos, Inches(11.733), Inches(1.65),
                               title=l_title, items=l_items, title_color=l_color,
-                              title_size=Pt(13), font_size=Pt(9.5), item_space=Pt(2), pad_y=Inches(0.10))
+                              title_size=Pt(13.5), font_size=Pt(10), pad_x=Inches(0.24), pad_y=Inches(0.14),
+                              item_space=Pt(4), line_spacing=1.18, accent_color=l_color)
 
     # =========================================================================
     # SLIDE 25: Future Horizons & Conclusion
@@ -1051,9 +1111,11 @@ def build_presentation():
         ("2. Ultra-Low-Power Edge Neuromorphic MCUs", "Quantize the 1D-CNN and signal filtering pipeline into 8-bit integer weights for ARM Cortex-M or RISC-V edge processors, enabling wearable pre-arrest alert chest patches."),
         ("3. Privacy-Preserving Federated Learning", "Deploy federated learning across decentralized multi-hospital networks with differential privacy, training robust models on diverse patient cohorts without sharing PHI.")
     ]
-    add_card_with_content(s25, Inches(0.8), Inches(1.65), Inches(5.70), Inches(5.35),
+    add_card_with_content(s25, Inches(0.80), Inches(1.68), Inches(5.70), Inches(5.20),
                           title="Future Technological Directions", items=items_fut,
-                          title_color=C_BLUE_PRIMARY, title_size=Pt(15), font_size=Pt(10), item_space=Pt(6))
+                          title_color=C_BLUE_PRIMARY, title_size=Pt(16.5), font_size=Pt(11),
+                          pad_x=Inches(0.28), pad_y=Inches(0.24), item_space=Pt(14),
+                          line_spacing=1.25, accent_color=C_BLUE_PRIMARY)
 
     items_con = [
         ("Airtight & Reproducible System", "Presented an end-to-end, leak-free multi-modal machine learning pipeline combining continuous 360 Hz ECG with longitudinal PhysioNet eICU telemetry."),
@@ -1061,9 +1123,11 @@ def build_presentation():
         ("Rank 1 Clinical Superiority", "Balanced Logistic Regression achieved Rank 1 (CDSI: 0.6527), delivering 70.09% sensitivity and minimizing FNR to 29.91% on holdout cohorts."),
         ("Sub-Second Bedside Feasibility", "Operating with deterministic latencies under 4.2 ms and minimal CPU footprint (< 12.4%), this research proves enterprise-grade early warning is feasible on standard hospital hardware.")
     ]
-    add_card_with_content(s25, Inches(6.83), Inches(1.65), Inches(5.70), Inches(5.35),
+    add_card_with_content(s25, Inches(6.83), Inches(1.68), Inches(5.70), Inches(5.20),
                           title="Concluding Summary", items=items_con,
-                          title_color=C_NAVY_DARK, title_size=Pt(15), font_size=Pt(10), item_space=Pt(6))
+                          title_color=C_NAVY_DARK, title_size=Pt(16.5), font_size=Pt(11),
+                          pad_x=Inches(0.28), pad_y=Inches(0.24), item_space=Pt(12),
+                          line_spacing=1.25, accent_color=C_NAVY_DARK)
 
     # =========================================================================
     # SLIDE 26: Key Publications & Academic References
@@ -1084,8 +1148,9 @@ def build_presentation():
         "[9] Task Force of the ESC and NASPE, 'Heart rate variability: Standards of measurement, physiological interpretation, and clinical use,' Circulation, vol. 93, no. 5, pp. 1043–1065, Mar. 1996.",
         "[10] R. M. Merchant et al., 'Part 3: Adult basic and advanced life support: 2020 American Heart Association guidelines for CPR and ECC,' Circulation, vol. 142, pp. S366–S468, Oct. 2020."
     ]
-    add_card_with_content(s26, Inches(0.8), Inches(1.65), Inches(11.733), Inches(5.35),
-                          title=None, items=refs, font_size=Pt(9.5), item_space=Pt(4), pad_y=Inches(0.18))
+    add_card_with_content(s26, Inches(0.80), Inches(1.68), Inches(11.733), Inches(5.20),
+                          title=None, items=refs, font_size=Pt(10), pad_x=Inches(0.28), pad_y=Inches(0.22),
+                          item_space=Pt(6), line_spacing=1.18)
 
     # =========================================================================
     # SLIDE 27: Thank You & Technical Q&A (Dark Hero Theme)
@@ -1093,13 +1158,12 @@ def build_presentation():
     s27 = prs.slides.add_slide(blank_layout)
     set_slide_background(s27, C_NAVY_DARK)
 
-    # Top accent line
-    bar2 = s27.shapes.add_shape(MSO_SHAPE.RECTANGLE, Inches(0.8), Inches(0.8), Inches(11.733), Inches(0.08))
+    bar2 = s27.shapes.add_shape(MSO_SHAPE.RECTANGLE, Inches(0.80), Inches(0.70), Inches(11.733), Inches(0.08))
     bar2.fill.solid()
     bar2.fill.fore_color.rgb = C_BLUE_PRIMARY
     bar2.line.color.rgb = C_BLUE_PRIMARY
 
-    tb_ty = s27.shapes.add_textbox(Inches(0.8), Inches(1.2), Inches(11.733), Inches(2.2))
+    tb_ty = s27.shapes.add_textbox(Inches(0.80), Inches(1.10), Inches(11.733), Inches(2.20))
     tf_ty = tb_ty.text_frame
     tf_ty.word_wrap = True
     tf_ty.margin_left = tf_ty.margin_top = tf_ty.margin_right = tf_ty.margin_bottom = 0
@@ -1130,10 +1194,12 @@ def build_presentation():
         ("Live Demonstration", "Clinical Dashboard running at http://localhost:8000 | Audit Ledger: SQLite (data/metadata.db)"),
         ("Source Code Repository", "GitHub: https://github.com/sajeevnetworksolutions-lgtm/Early-Detection-Cardiac-Arrest-ML")
     ]
-    add_card_with_content(s27, Inches(0.8), Inches(3.7), Inches(11.733), Inches(3.1),
+    add_card_with_content(s27, Inches(0.80), Inches(3.75), Inches(11.733), Inches(3.10),
                           title="ACADEMIC & CONTACT INFORMATION", items=info_items,
-                          title_color=C_TEAL, title_size=Pt(13), font_size=Pt(10.5),
-                          bg_color=C_NAVY_LIGHT, border_color=C_BORDER_DARK, item_space=Pt(4))
+                          title_color=C_TEAL, title_size=Pt(13.5), font_size=Pt(11),
+                          bg_color=C_NAVY_LIGHT, border_color=C_BORDER_DARK,
+                          pad_x=Inches(0.28), pad_y=Inches(0.20), item_space=Pt(6),
+                          line_spacing=1.20, accent_color=C_TEAL, corner_radius=0.035)
 
     # Save presentation
     out_dir = os.path.join(PROJECT_ROOT, "presentation")
@@ -1142,14 +1208,6 @@ def build_presentation():
     prs.save(out_file)
     print(f"Presentation saved successfully to: {out_file}")
     print(f"Total Slides Generated: {len(prs.slides)}")
-
-    # Copy to Downloads
-    downloads_path = os.path.join(r"C:\Users\91990\Downloads", "Early_Detection_of_Cardiac_Arrest_ML_Presentation.pptx")
-    try:
-        shutil.copyfile(out_file, downloads_path)
-        print(f"Copied successfully to: {downloads_path}")
-    except Exception as e:
-        print(f"Warning: could not copy to downloads: {e}")
 
     return out_file
 
