@@ -1019,9 +1019,11 @@ def build_presentation():
     set_slide_background(s22, C_BG_LIGHT)
     add_header(s22, "System Implementation", "Full-Stack Enterprise Clinical Software Architecture", "Production-grade FastAPI asynchronous backend and React 19 / TypeScript clinical dashboard")
 
-    dash_img = os.path.join(PROJECT_ROOT, "browser_evidence", "6653ec40-bbe4-4f03-ada8-b780b176cee1", "final_step_20.png")
+    dash_img = os.path.join(ASSETS_DIR, "dashboard_screenshot.png")
     if os.path.exists(dash_img):
-        s22.shapes.add_picture(dash_img, Inches(0.80), Inches(1.68), Inches(6.50), Inches(4.15))
+        # Framed dashboard screenshot with clean border
+        add_card(s22, Inches(0.80), Inches(1.68), Inches(6.50), Inches(4.15), bg_color=C_CARD_BG, border_color=C_BORDER_LIGHT, corner_radius=0.03)
+        s22.shapes.add_picture(dash_img, Inches(0.84), Inches(1.72), Inches(6.42), Inches(4.07))
 
     items_fsd = [
         ("Frontend Presentation Tier", "React 19 + TypeScript + Vite + Tailwind CSS. 8 responsive modules: Home Dashboard, Dataset Explorer, ECG Analysis, Risk Calculator, Training, Performance, History, and Reports."),
