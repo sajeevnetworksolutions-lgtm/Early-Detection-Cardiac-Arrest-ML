@@ -102,6 +102,10 @@ export const api = {
     return `${BASE_URL}/reports/pdf`;
   },
 
+  getPresentationPptxUrl(): string {
+    return `${BASE_URL}/reports/pptx`;
+  },
+
   getComparisonCsvUrl(): string {
     return `${BASE_URL}/reports/csv`;
   },

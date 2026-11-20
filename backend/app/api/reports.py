@@ -34,6 +34,21 @@ def download_research_pdf():
         filename="Early_Cardiac_Arrest_Detection_Research_Report.pdf"
     )
 
+@router.get("/pptx")
+def download_presentation_pptx():
+    """
+    Returns the comprehensive 27-slide research presentation PPTX.
+    """
+    pptx_path = os.path.join(PROJECT_ROOT, "presentation", "Early_Detection_of_Cardiac_Arrest_ML_Presentation.pptx")
+    if not os.path.exists(pptx_path):
+        raise HTTPException(status_code=404, detail="Presentation PPTX not found.")
+
+    return FileResponse(
+        path=pptx_path,
+        media_type="application/vnd.openxmlformats-officedocument.presentationml.presentation",
+        filename="Early_Detection_of_Cardiac_Arrest_ML_Presentation.pptx"
+    )
+
 @router.get("/csv")
 def download_comparison_csv():
     """

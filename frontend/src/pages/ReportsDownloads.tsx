@@ -7,7 +7,8 @@ import {
   Download,
   Award,
   CheckCircle2,
-  ExternalLink
+  ExternalLink,
+  Presentation
 } from 'lucide-react';
 import { api } from '../services/api';
 
@@ -85,7 +86,7 @@ export const ReportsDownloads: React.FC = () => {
       </div>
 
       {/* Download Action Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* PDF Download Card */}
         <div className="bg-gradient-to-br from-slate-900 to-sky-950 text-white rounded-2xl p-6 border border-slate-800 shadow-sm flex flex-col justify-between">
           <div>
@@ -93,15 +94,15 @@ export const ReportsDownloads: React.FC = () => {
               <Award className="w-3.5 h-3.5" />
               <span>Full Academic Thesis Report</span>
             </div>
-            <h3 className="text-lg font-bold">Research Project Report (PDF)</h3>
+            <h3 className="text-lg font-bold">Research Report (PDF)</h3>
             <p className="text-xs text-slate-300 mt-1 leading-relaxed">
               Complete academic paper compiled with ReportLab containing problem statement, literature survey,
-              data preprocessing, Butterworth ECG filtering, model comparisons, ROC/PR curves, and clinical discussions.
+              preprocessing, Butterworth ECG filtering, comparisons, ROC/PR curves, and clinical discussions.
             </p>
           </div>
 
           <div className="mt-6 flex items-center justify-between pt-4 border-t border-slate-800">
-            <span className="text-[11px] text-slate-400">PDF • 1.33 MB • Publication Quality</span>
+            <span className="text-[11px] text-slate-400">PDF • 1.33 MB</span>
             <a
               href={api.getReportPdfUrl()}
               target="_blank"
@@ -114,6 +115,32 @@ export const ReportsDownloads: React.FC = () => {
           </div>
         </div>
 
+        {/* Presentation PPTX Card */}
+        <div className="bg-gradient-to-br from-slate-900 to-teal-950 text-white rounded-2xl p-6 border border-slate-800 shadow-sm flex flex-col justify-between">
+          <div>
+            <div className="inline-flex items-center gap-2 bg-teal-500/20 text-teal-300 text-[11px] font-semibold px-2.5 py-0.5 rounded-full mb-3">
+              <Presentation className="w-3.5 h-3.5" />
+              <span>27-Slide Defense Deck</span>
+            </div>
+            <h3 className="text-lg font-bold">Presentation Deck (PPTX)</h3>
+            <p className="text-xs text-slate-300 mt-1 leading-relaxed">
+              Comprehensive 27-slide presentation with embedded 7-stage block diagrams (Figure 1), physician-in-the-loop workflows (Figure 2), benchmark tables, ROC curves, and case studies.
+            </p>
+          </div>
+
+          <div className="mt-6 flex items-center justify-between pt-4 border-t border-slate-800">
+            <span className="text-[11px] text-slate-400">PPTX • 1.60 MB • 16:9 Widescreen</span>
+            <a
+              href={api.getPresentationPptxUrl()}
+              download="Early_Detection_of_Cardiac_Arrest_ML_Presentation.pptx"
+              className="flex items-center gap-2 bg-teal-500 hover:bg-teal-400 text-white text-xs font-semibold px-4 py-2 rounded-xl transition-all"
+            >
+              <Download className="w-4 h-4" />
+              <span>Download PPTX</span>
+            </a>
+          </div>
+        </div>
+
         {/* CSV Download Card */}
         <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-xs flex flex-col justify-between">
           <div>
@@ -121,7 +148,7 @@ export const ReportsDownloads: React.FC = () => {
               <FileSpreadsheet className="w-3.5 h-3.5 text-teal-600" />
               <span>Measurable Test Data</span>
             </div>
-            <h3 className="text-lg font-bold text-slate-900">Experimental Evaluation Metrics (CSV)</h3>
+            <h3 className="text-lg font-bold text-slate-900">Evaluation Metrics (CSV)</h3>
             <p className="text-xs text-slate-500 mt-1 leading-relaxed">
               Export all 11 evaluation metrics for the six synopsis machine learning algorithms:
               Accuracy, Sensitivity, Specificity, Precision, F1-Score, ROC-AUC, PR-AUC, FPR, FNR, and CDSI.
@@ -129,7 +156,7 @@ export const ReportsDownloads: React.FC = () => {
           </div>
 
           <div className="mt-6 flex items-center justify-between pt-4 border-t border-slate-100">
-            <span className="text-[11px] text-slate-400">CSV • UTF-8 • Test Partition (1,000 Pts)</span>
+            <span className="text-[11px] text-slate-400">CSV • UTF-8 • 1,000 Pts</span>
             <a
               href={api.getComparisonCsvUrl()}
               download="model_comparison.csv"
